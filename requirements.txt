@@ -1,0 +1,9 @@
+# Core dependencies
+openai>=1.0.0
+
+# For future enhancements (commented out for now):
+# python-dotenv>=0.19.0  # For environment variable management
+# click>=8.0.0           # For advanced CLI features
+# pydantic>=2.0.0        # For configuration validation
+# SQLAlchemy>=2.0.0      # For caching and memory storage
+# pytest>=7.0.0          # For unit testing
