@@ -10,7 +10,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from config import TranslationConfig
+from config import DEFAULT_CACHE_DB_PATH, TranslationConfig
 from pipeline import TranslationPipeline
 
 
@@ -44,6 +44,7 @@ Examples:
   python main.py --input book.txt --output book_es.txt
   python main.py --input book.txt --output book_es.txt --chunk-size 1500
   python main.py --input book.txt --output book_es.txt --translator openai --api-key sk-...
+  python main.py --input book.txt --output book_es.txt --translator openai --glossary data/glossaries/example_fantasy_es.json --report data/output/report.json
         """,
     )
 
@@ -110,6 +111,39 @@ Examples:
     )
 
     parser.add_argument(
+        "--glossary",
+        type=str,
+        default=None,
+        help="Path to glossary JSON file (optional)",
+    )
+
+    parser.add_argument(
+        "--cache-db",
+        type=str,
+        default=str(DEFAULT_CACHE_DB_PATH),
+        help=f"Path to SQLite DB used for cache/TM (default: {DEFAULT_CACHE_DB_PATH})",
+    )
+
+    parser.add_argument(
+        "--disable-cache",
+        action="store_true",
+        help="Disable persistent translation cache",
+    )
+
+    parser.add_argument(
+        "--disable-tm",
+        action="store_true",
+        help="Disable translation memory lookups/storage",
+    )
+
+    parser.add_argument(
+        "--report",
+        type=str,
+        default=None,
+        help="Path to output JSON report for the run (optional)",
+    )
+
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -143,6 +177,11 @@ def main() -> int:
             translator_type=args.translator,
             api_key=args.api_key,
             model=args.model or os.getenv("OPENAI_MODEL", "gpt-5.2"),
+            glossary_path=Path(args.glossary) if args.glossary else None,
+            cache_db_path=Path(args.cache_db),
+            disable_cache=args.disable_cache,
+            disable_translation_memory=args.disable_tm,
+            report_path=Path(args.report) if args.report else None,
         )
 
         # Run pipeline
@@ -159,6 +198,8 @@ def main() -> int:
         print(f"Translator used: {result.translator_used}")
         print(f"Source language: {result.source_language}")
         print(f"Target language: {result.target_language}")
+        if config.report_path:
+            print(f"Report file: {config.report_path}")
         print("=" * 60)
 
         return 0

@@ -5,10 +5,14 @@ Provides an abstraction layer for different translation services
 and implementations for mock and real translators.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Dict, Optional, Sequence
+
+from glossary import GlossaryTerm
 from models import TextChunk, TranslatedChunk
 from prompt_builder import PromptBuilder
 
@@ -18,7 +22,7 @@ logger = logging.getLogger(__name__)
 class BaseTranslator(ABC):
     """
     Abstract base class for translation implementations.
-    
+
     Defines the interface that all translator implementations must follow.
     """
 
@@ -26,30 +30,38 @@ class BaseTranslator(ABC):
     def translate(self, chunk: TextChunk) -> TranslatedChunk:
         """
         Translate a text chunk.
-        
+
         Args:
             chunk: The TextChunk to translate
-            
+
         Returns:
             A TranslatedChunk with the translated content
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def get_name(self) -> str:
         """
         Get the name of this translator implementation.
-        
+
         Returns:
             A string name (e.g., 'MockTranslator', 'OpenAITranslator')
         """
-        pass
+        raise NotImplementedError
+
+    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
+        """
+        Optional hook for glossary-aware translators.
+
+        Default implementation is a no-op to keep compatibility across backends.
+        """
+        _ = glossary_terms
 
 
 class MockTranslator(BaseTranslator):
     """
     Mock translator for testing and development.
-    
+
     Returns a fake translated version by prefixing text with a marker.
     Allows full pipeline testing without API calls or API keys.
     """
@@ -57,7 +69,7 @@ class MockTranslator(BaseTranslator):
     def __init__(self, target_language: str = "es"):
         """
         Initialize the mock translator.
-        
+
         Args:
             target_language: Target language code (default: 'es' for Spanish)
         """
@@ -66,20 +78,18 @@ class MockTranslator(BaseTranslator):
     def translate(self, chunk: TextChunk) -> TranslatedChunk:
         """
         Return a mock translation of the chunk.
-        
+
         For demonstration, prefixes the original text with a translation marker
         and translates a few known keywords.
-        
+
         Args:
             chunk: The TextChunk to translate
-            
+
         Returns:
             A TranslatedChunk with mock translated content
         """
-        logger.info(f"MockTranslator: translating chunk {chunk.index}")
+        logger.info("MockTranslator: translating chunk %s", chunk.index)
 
-        # Simple mock translation: prefix with language code and perform
-        # basic keyword substitution for demonstration
         translated_text = self._mock_translate(chunk.original_text)
 
         return TranslatedChunk(
@@ -88,19 +98,19 @@ class MockTranslator(BaseTranslator):
             translated_text=translated_text,
             word_count=chunk.word_count,
             translator_used="MockTranslator",
+            metadata={},
         )
 
     def _mock_translate(self, text: str) -> str:
         """
         Perform mock translation with simple keyword replacements.
-        
+
         Args:
             text: Text to mock-translate
-            
+
         Returns:
             Mock translated text
         """
-        # Basic mock translation dictionary for common English words
         mock_dict = {
             "the": "el/la",
             "is": "es",
@@ -114,18 +124,14 @@ class MockTranslator(BaseTranslator):
             "for": "para",
         }
 
-        # Perform simple case-insensitive replacements
         translated = text
         for eng, esp in mock_dict.items():
-            # Replace whole words only (simple approach)
             import re
 
             pattern = r"\b" + eng + r"\b"
             translated = re.sub(pattern, esp, translated, flags=re.IGNORECASE)
 
-        # Add a prefix to indicate this is a mock translation
-        translated = f"[ES MOCK TRANSLATION]\n{translated}"
-        return translated
+        return f"[ES MOCK TRANSLATION]\n{translated}"
 
     def get_name(self) -> str:
         """Return the name of this translator."""
@@ -146,15 +152,17 @@ class OpenAITranslator(BaseTranslator):
         model: str = "gpt-5.2",
         source_language: str = "English",
         target_language: str = "Spanish",
+        glossary_terms: Optional[Sequence[GlossaryTerm]] = None,
     ):
         """
         Initialize the OpenAI translator.
-        
+
         Args:
             api_key: OpenAI API key (optional if OPENAI_API_KEY env var exists)
             model: Model to use (default: gpt-5.2)
             source_language: Source language name
             target_language: Target language name
+            glossary_terms: Optional glossary terms for prompt injection
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         self.model = model.strip()
@@ -170,31 +178,30 @@ class OpenAITranslator(BaseTranslator):
 
         try:
             from openai import OpenAI
-        except ImportError as e:
+        except ImportError as exc:
             raise ImportError(
                 "The 'openai' package is not installed. "
                 "Install dependencies with: pip install -r requirements.txt"
-            ) from e
+            ) from exc
 
         self.client = OpenAI(api_key=self.api_key)
         self.prompt_builder = PromptBuilder(
             source_language=self.source_language,
             target_language=self.target_language,
+            glossary_terms=glossary_terms,
         )
 
     def translate(self, chunk: TextChunk) -> TranslatedChunk:
         """
         Translate a chunk using OpenAI API.
-        
+
         Args:
             chunk: The TextChunk to translate
-            
+
         Returns:
             A TranslatedChunk with translated content
         """
-        logger.info(
-            f"OpenAITranslator ({self.model}): translating chunk {chunk.index}"
-        )
+        logger.info("OpenAITranslator (%s): translating chunk %s", self.model, chunk.index)
 
         try:
             response = self.client.responses.create(
@@ -203,6 +210,7 @@ class OpenAITranslator(BaseTranslator):
                 input=self.prompt_builder.build_translation_prompt(chunk),
             )
             translated_text = self._extract_output_text(response)
+            usage = self._extract_usage_metadata(response)
 
             if not translated_text:
                 raise ValueError("OpenAI API returned an empty translation response")
@@ -213,13 +221,19 @@ class OpenAITranslator(BaseTranslator):
                 translated_text=translated_text,
                 word_count=chunk.word_count,
                 translator_used=f"OpenAITranslator({self.model})",
+                estimated_tokens=usage.get("total_tokens"),
+                metadata={"usage": usage} if usage else {},
             )
 
-        except Exception as e:
-            logger.error(f"OpenAI translation failed for chunk {chunk.index}: {e}")
+        except Exception as exc:
+            logger.error("OpenAI translation failed for chunk %s: %s", chunk.index, exc)
             raise RuntimeError(
-                f"OpenAI translation failed for chunk {chunk.index}: {e}"
-            ) from e
+                f"OpenAI translation failed for chunk {chunk.index}: {exc}"
+            ) from exc
+
+    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
+        """Inject glossary terms into prompt generation at runtime."""
+        self.prompt_builder.set_glossary_terms(glossary_terms)
 
     @staticmethod
     def _extract_output_text(response) -> str:
@@ -237,6 +251,20 @@ class OpenAITranslator(BaseTranslator):
                     text_parts.append(text)
 
         return "\n".join(text_parts).strip()
+
+    @staticmethod
+    def _extract_usage_metadata(response) -> Dict[str, int]:
+        """Extract token usage metadata from a Responses API object, if available."""
+        usage_obj = getattr(response, "usage", None)
+        if usage_obj is None:
+            return {}
+
+        usage: Dict[str, int] = {}
+        for key in ("input_tokens", "output_tokens", "total_tokens"):
+            value = getattr(usage_obj, key, None)
+            if isinstance(value, int):
+                usage[key] = value
+        return usage
 
     @staticmethod
     def _normalize_language(language: str) -> str:
@@ -262,7 +290,7 @@ class OpenAITranslator(BaseTranslator):
 class TranslatorFactory:
     """
     Factory for creating translator instances.
-    
+
     Supports pluggable translator types and future extensibility.
     """
 
@@ -279,20 +307,22 @@ class TranslatorFactory:
         target_language: str = "Spanish",
         api_key: Optional[str] = None,
         model: str = "gpt-5.2",
+        glossary_terms: Optional[Sequence[GlossaryTerm]] = None,
     ) -> BaseTranslator:
         """
         Create a translator instance.
-        
+
         Args:
             translator_type: Type of translator ('mock' or 'openai')
             source_language: Source language name
             target_language: Target language name
             api_key: Optional API key for translation service
             model: OpenAI model name when using OpenAI translator
-            
+            glossary_terms: Optional glossary terms for prompt-aware translators
+
         Returns:
             A BaseTranslator instance
-            
+
         Raises:
             ValueError: If translator type is not supported
         """
@@ -306,28 +336,27 @@ class TranslatorFactory:
 
         if translator_type == "mock":
             return translator_class(target_language=target_language)
-        elif translator_type == "openai":
+        if translator_type == "openai":
             return translator_class(
                 api_key=api_key,
                 model=model,
                 source_language=source_language,
                 target_language=target_language,
+                glossary_terms=glossary_terms,
             )
-        
+
         raise ValueError(f"Cannot create translator: {translator_type}")
 
     @classmethod
-    def register(
-        cls, translator_type: str, translator_class: type
-    ) -> None:
+    def register(cls, translator_type: str, translator_class: type) -> None:
         """
         Register a new translator type.
-        
+
         Allows future extensibility for additional translator backends.
-        
+
         Args:
             translator_type: Key for the translator type
             translator_class: Class implementing BaseTranslator
         """
         cls._translators[translator_type] = translator_class
-        logger.info(f"Registered translator type: {translator_type}")
+        logger.info("Registered translator type: %s", translator_type)

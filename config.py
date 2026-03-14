@@ -23,6 +23,11 @@ class TranslationConfig:
         translator_type: Which translator to use ('mock' or 'openai', default: 'mock')
         api_key: API key for paid translation services (optional)
         model: OpenAI model name when using OpenAI translator (default: 'gpt-5.2')
+        glossary_path: Optional path to glossary JSON file
+        cache_db_path: SQLite path used for cache and translation memory
+        disable_cache: Disable cache lookups/storage when True
+        disable_translation_memory: Disable translation memory lookups/storage when True
+        report_path: Optional path to JSON report output
     """
     input_path: Path
     output_path: Path
@@ -32,6 +37,11 @@ class TranslationConfig:
     translator_type: str = "mock"
     api_key: Optional[str] = None
     model: str = "gpt-5.2"
+    glossary_path: Optional[Path] = None
+    cache_db_path: Path = Path("data/cache/translation_store.sqlite3")
+    disable_cache: bool = False
+    disable_translation_memory: bool = False
+    report_path: Optional[Path] = None
 
     def __post_init__(self):
         """Validate configuration on creation."""
@@ -40,6 +50,12 @@ class TranslationConfig:
             self.input_path = Path(self.input_path)
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
+        if isinstance(self.glossary_path, str):
+            self.glossary_path = Path(self.glossary_path)
+        if isinstance(self.cache_db_path, str):
+            self.cache_db_path = Path(self.cache_db_path)
+        if isinstance(self.report_path, str):
+            self.report_path = Path(self.report_path)
 
         # Validate values
         if self.chunk_size < 100:
@@ -50,6 +66,8 @@ class TranslationConfig:
             raise ValueError("Translator type must be 'mock' or 'openai'")
         if not self.model or not self.model.strip():
             raise ValueError("Model name cannot be empty")
+        if self.cache_db_path is None:
+            raise ValueError("cache_db_path cannot be None")
 
     def ensure_output_dir_exists(self) -> None:
         """Create output directory if it does not exist."""
@@ -62,3 +80,4 @@ DEFAULT_TARGET_LANGUAGE = "es"
 DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_TRANSLATOR = "mock"
 DEFAULT_MODEL = "gpt-5.2"
+DEFAULT_CACHE_DB_PATH = Path("data/cache/translation_store.sqlite3")

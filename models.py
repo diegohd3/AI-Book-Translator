@@ -5,7 +5,7 @@ Defines dataclasses for document chunks, translation results, and related struct
 """
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -43,12 +43,18 @@ class TranslatedChunk:
         translated_text: The translated text
         word_count: Number of words in the original chunk
         translator_used: Name of the translator that produced this translation
+        translation_source: Origin of the translated content ('translator', 'cache', 'tm')
+        estimated_tokens: Optional token estimate from backend metadata
+        metadata: Extra backend metadata for observability/reporting
     """
     index: int
     original_text: str
     translated_text: str
     word_count: int
     translator_used: str = "unknown"
+    translation_source: str = "translator"
+    estimated_tokens: Optional[int] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
