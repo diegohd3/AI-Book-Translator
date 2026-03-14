@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Optional, Union
 
@@ -58,7 +59,7 @@ class TranslationCache:
         """
 
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 conn.execute(statement)
                 conn.execute(
                     """
@@ -91,7 +92,7 @@ class TranslationCache:
         )
 
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 row = conn.execute(
                     "SELECT translated_text FROM translation_cache WHERE cache_key = ?",
                     (cache_key,),
@@ -123,7 +124,7 @@ class TranslationCache:
         )
 
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 conn.execute(
                     """
                     INSERT OR REPLACE INTO translation_cache (

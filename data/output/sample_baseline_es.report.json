@@ -1,0 +1,78 @@
+{
+  "input_file": "data\\input\\sample_literary_excerpt.txt",
+  "output_file": "data\\output\\sample_baseline_es.txt",
+  "translator_backend": "mock",
+  "model": "gpt-5.2",
+  "source_language": "en",
+  "target_language": "es",
+  "total_chunks": 1,
+  "translated_chunks": 1,
+  "cache_hits": 0,
+  "cache_misses": 1,
+  "translation_memory_hits": 0,
+  "estimated_token_usage": null,
+  "started_at": "2026-03-14T01:37:33.538802+00:00",
+  "finished_at": "2026-03-14T01:37:33.555744+00:00",
+  "elapsed_seconds": 0.0169,
+  "errors": [],
+  "style_profile_hash": "c1d7cb015171b3cf5eb040ad4c8c3f21f93f0012e4c86f537e450da21e3cc17e",
+  "style_profile": {
+    "source_language": "en",
+    "target_language": "es",
+    "genre": "general literary",
+    "tone": "faithful literary tone",
+    "audience": "adult general readers",
+    "formality": "neutral",
+    "translation_strategy": "faithful literary translation with natural Spanish flow",
+    "author_voice_notes": "preserve narrative rhythm, subtext, and emotional intent",
+    "dialogue_style": "native, idiomatic Spanish dialogue with distinct character voices",
+    "narrator_style": "fluid literary narrator voice, avoid robotic syntax",
+    "forbidden_patterns": [
+      "literal word-by-word calques",
+      "mechanical syntax that sounds translated"
+    ],
+    "preferred_patterns": [
+      "natural Spanish phrasing",
+      "cohesive paragraph rhythm"
+    ]
+  },
+  "policy_hash": "41cf11f1d6a753503d87d76ac83e1f50d3f41df448acf4ebeb1694472e07d385",
+  "glossary_total_terms": 0,
+  "glossary_matches_relevant": {},
+  "glossary_matches_used": {},
+  "recurring_terms": {
+    "characters": [
+      "Marta",
+      "The"
+    ],
+    "places": [],
+    "invented_terms": [],
+    "key_repeated_phrases": []
+  },
+  "consistency_risks": [
+    "chunk 0: RISK: possible untranslated English span(s): said Tomas though his hand was | Tomas though his hand was already"
+  ],
+  "uncertain_translations": [],
+  "chunks": [
+    {
+      "index": 0,
+      "word_count": 54,
+      "chunk_signal": "dialogue",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): said Tomas though his hand was | Tomas though his hand was already"
+      ],
+      "diagnostics": {
+        "dialogue_score": 0.8333,
+        "emphasis_score": 0.0,
+        "refinement_drift": null
+      }
+    }
+  ]
+}

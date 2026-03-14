@@ -1,0 +1,22 @@
+﻿{
+  "source_language": "en",
+  "target_language": "es",
+  "genre": "contemporary literary fiction",
+  "tone": "dramatic and intimate",
+  "audience": "adult readers",
+  "formality": "neutral",
+  "translation_strategy": "faithful literary translation prioritizing natural Spanish flow",
+  "author_voice_notes": "preserve irony, emotional subtext, and sentence rhythm",
+  "dialogue_style": "idiomatic Mexican/neutral Spanish that sounds native",
+  "narrator_style": "fluid, immersive narrator voice with subtle tension",
+  "forbidden_patterns": [
+    "word-by-word calques",
+    "overly literal English syntax",
+    "robotic repetitive sentence openings"
+  ],
+  "preferred_patterns": [
+    "natural idiomatic Spanish dialogue",
+    "dramatic pacing preserved",
+    "cohesive paragraph cadence"
+  ]
+}

@@ -1,13 +1,17 @@
-{
+﻿{
   "terms": [
     {
       "source": "Mana Core",
       "target": "Núcleo de maná",
-      "notes": "Always use this term in fantasy context"
+      "notes": "Always use this term in fantasy context",
+      "policy": "forced",
+      "case_sensitive": false
     },
     {
       "source": "sword aura",
-      "target": "aura de espada"
+      "target": "aura de espada",
+      "policy": "preferred",
+      "case_sensitive": false
     }
   ]
 }

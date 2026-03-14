@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from contextlib import closing
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -52,7 +53,7 @@ class TranslationMemory:
     def initialize_schema(self) -> None:
         """Create TM schema if it does not exist."""
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 conn.execute(
                     """
                     CREATE TABLE IF NOT EXISTS translation_memory (
@@ -100,7 +101,7 @@ class TranslationMemory:
         )
 
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 row = conn.execute(
                     """
                     SELECT translated_text, metadata_json
@@ -155,7 +156,7 @@ class TranslationMemory:
         )
 
         try:
-            with self._connect() as conn:
+            with closing(self._connect()) as conn:
                 conn.execute(
                     """
                     INSERT INTO translation_memory (

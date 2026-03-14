@@ -1,4 +1,4 @@
-"""
+﻿"""
 Translation module with pluggable translator backends.
 
 Provides an abstraction layer for different translation services
@@ -15,82 +15,77 @@ from typing import Dict, Optional, Sequence
 from glossary import GlossaryTerm
 from models import TextChunk, TranslatedChunk
 from prompt_builder import PromptBuilder
+from style_profile import StyleProfile
 
 logger = logging.getLogger(__name__)
 
 
 class BaseTranslator(ABC):
-    """
-    Abstract base class for translation implementations.
-
-    Defines the interface that all translator implementations must follow.
-    """
+    """Abstract base class for translation implementations."""
 
     @abstractmethod
-    def translate(self, chunk: TextChunk) -> TranslatedChunk:
-        """
-        Translate a text chunk.
-
-        Args:
-            chunk: The TextChunk to translate
-
-        Returns:
-            A TranslatedChunk with the translated content
-        """
+    def translate(
+        self,
+        chunk: TextChunk,
+        *,
+        prompt_metadata: Optional[dict] = None,
+    ) -> TranslatedChunk:
+        """Translate a source chunk (stage 1 draft)."""
         raise NotImplementedError
 
     @abstractmethod
     def get_name(self) -> str:
-        """
-        Get the name of this translator implementation.
-
-        Returns:
-            A string name (e.g., 'MockTranslator', 'OpenAITranslator')
-        """
+        """Return translator display name."""
         raise NotImplementedError
 
-    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
-        """
-        Optional hook for glossary-aware translators.
+    def refine(
+        self,
+        chunk: TextChunk,
+        draft_text: str,
+        *,
+        prompt_metadata: Optional[dict] = None,
+    ) -> TranslatedChunk:
+        """Refine a stage 1 translation. Default behavior is no-op."""
+        _ = prompt_metadata
+        return TranslatedChunk(
+            index=chunk.index,
+            original_text=chunk.original_text,
+            translated_text=draft_text,
+            word_count=chunk.word_count,
+            translator_used=f"{self.get_name()}[refinement-no-op]",
+            metadata={"refinement": "no-op"},
+        )
 
-        Default implementation is a no-op to keep compatibility across backends.
-        """
+    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
+        """Optional hook for glossary-aware translators."""
         _ = glossary_terms
+
+    def configure_style_profile(self, style_profile: StyleProfile) -> None:
+        """Optional hook for style-aware translators."""
+        _ = style_profile
+
+    def supports_refinement(self) -> bool:
+        """Return True when translator can run a real stage-2 refinement call."""
+        return False
 
 
 class MockTranslator(BaseTranslator):
-    """
-    Mock translator for testing and development.
-
-    Returns a fake translated version by prefixing text with a marker.
-    Allows full pipeline testing without API calls or API keys.
-    """
+    """Mock translator for testing and development."""
 
     def __init__(self, target_language: str = "es"):
-        """
-        Initialize the mock translator.
-
-        Args:
-            target_language: Target language code (default: 'es' for Spanish)
-        """
         self.target_language = target_language
 
-    def translate(self, chunk: TextChunk) -> TranslatedChunk:
-        """
-        Return a mock translation of the chunk.
-
-        For demonstration, prefixes the original text with a translation marker
-        and translates a few known keywords.
-
-        Args:
-            chunk: The TextChunk to translate
-
-        Returns:
-            A TranslatedChunk with mock translated content
-        """
+    def translate(
+        self,
+        chunk: TextChunk,
+        *,
+        prompt_metadata: Optional[dict] = None,
+    ) -> TranslatedChunk:
         logger.info("MockTranslator: translating chunk %s", chunk.index)
-
         translated_text = self._mock_translate(chunk.original_text)
+
+        metadata = _sanitize_prompt_metadata(prompt_metadata)
+        metadata["stage"] = "draft"
 
         return TranslatedChunk(
             index=chunk.index,
@@ -98,19 +93,10 @@ class MockTranslator(BaseTranslator):
             translated_text=translated_text,
             word_count=chunk.word_count,
             translator_used="MockTranslator",
-            metadata={},
+            metadata=metadata,
         )
 
     def _mock_translate(self, text: str) -> str:
-        """
-        Perform mock translation with simple keyword replacements.
-
-        Args:
-            text: Text to mock-translate
-
-        Returns:
-            Mock translated text
-        """
         mock_dict = {
             "the": "el/la",
             "is": "es",
@@ -134,17 +120,11 @@ class MockTranslator(BaseTranslator):
         return f"[ES MOCK TRANSLATION]\n{translated}"
 
     def get_name(self) -> str:
-        """Return the name of this translator."""
         return "MockTranslator"
 
 
 class OpenAITranslator(BaseTranslator):
-    """
-    OpenAI-based translator implementation.
-
-    Uses the OpenAI Responses API to translate each chunk while preserving
-    paragraph structure and document order.
-    """
+    """OpenAI-based translator implementation."""
 
     def __init__(
         self,
@@ -153,17 +133,8 @@ class OpenAITranslator(BaseTranslator):
         source_language: str = "English",
         target_language: str = "Spanish",
         glossary_terms: Optional[Sequence[GlossaryTerm]] = None,
+        style_profile: Optional[StyleProfile] = None,
     ):
-        """
-        Initialize the OpenAI translator.
-
-        Args:
-            api_key: OpenAI API key (optional if OPENAI_API_KEY env var exists)
-            model: Model to use (default: gpt-5.2)
-            source_language: Source language name
-            target_language: Target language name
-            glossary_terms: Optional glossary terms for prompt injection
-        """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         self.model = model.strip()
         self.source_language = self._normalize_language(source_language)
@@ -189,31 +160,93 @@ class OpenAITranslator(BaseTranslator):
             source_language=self.source_language,
             target_language=self.target_language,
             glossary_terms=glossary_terms,
+            style_profile=style_profile,
         )
 
-    def translate(self, chunk: TextChunk) -> TranslatedChunk:
-        """
-        Translate a chunk using OpenAI API.
+    def translate(
+        self,
+        chunk: TextChunk,
+        *,
+        prompt_metadata: Optional[dict] = None,
+    ) -> TranslatedChunk:
+        return self._translate_stage(
+            chunk,
+            stage="draft",
+            prompt_metadata=prompt_metadata,
+            draft_text=None,
+        )
 
-        Args:
-            chunk: The TextChunk to translate
+    def refine(
+        self,
+        chunk: TextChunk,
+        draft_text: str,
+        *,
+        prompt_metadata: Optional[dict] = None,
+    ) -> TranslatedChunk:
+        return self._translate_stage(
+            chunk,
+            stage="refinement",
+            prompt_metadata=prompt_metadata,
+            draft_text=draft_text,
+        )
 
-        Returns:
-            A TranslatedChunk with translated content
-        """
-        logger.info("OpenAITranslator (%s): translating chunk %s", self.model, chunk.index)
+    def supports_refinement(self) -> bool:
+        return True
+
+    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
+        self.prompt_builder.set_glossary_terms(glossary_terms)
+
+    def configure_style_profile(self, style_profile: StyleProfile) -> None:
+        self.prompt_builder.set_style_profile(style_profile)
+
+    def _translate_stage(
+        self,
+        chunk: TextChunk,
+        *,
+        stage: str,
+        prompt_metadata: Optional[dict],
+        draft_text: Optional[str],
+    ) -> TranslatedChunk:
+        metadata = dict(prompt_metadata or {})
+        chunk_signal = str(metadata.get("chunk_signal", "narration"))
+        context_snapshot = metadata.get("context_snapshot")
+        relevant_matches = metadata.get("relevant_glossary_terms")
+
+        logger.info(
+            "OpenAITranslator (%s): %s chunk %s",
+            self.model,
+            stage,
+            chunk.index,
+        )
 
         try:
+            payload = self.prompt_builder.build_payload(
+                chunk,
+                stage=stage,
+                chunk_signal=chunk_signal,
+                context_snapshot=context_snapshot if isinstance(context_snapshot, dict) else None,
+                relevant_matches=relevant_matches,
+                draft_text=draft_text,
+                api_format="openai",
+            )
+
             response = self.client.responses.create(
                 model=self.model,
-                instructions=self.prompt_builder.build_system_prompt(),
-                input=self.prompt_builder.build_translation_prompt(chunk),
+                instructions=payload["instructions"],
+                input=payload["input"],
             )
+
             translated_text = self._extract_output_text(response)
             usage = self._extract_usage_metadata(response)
 
             if not translated_text:
                 raise ValueError("OpenAI API returned an empty translation response")
+
+            response_metadata: Dict[str, object] = {
+                "stage": stage,
+                "usage": usage,
+            }
+            response_metadata.update(_sanitize_prompt_metadata(metadata))
 
             return TranslatedChunk(
                 index=chunk.index,
@@ -221,23 +254,18 @@ class OpenAITranslator(BaseTranslator):
                 translated_text=translated_text,
                 word_count=chunk.word_count,
                 translator_used=f"OpenAITranslator({self.model})",
-                estimated_tokens=usage.get("total_tokens"),
-                metadata={"usage": usage} if usage else {},
+                estimated_tokens=usage.get("total_tokens") if usage else None,
+                metadata=response_metadata,
             )
 
         except Exception as exc:
-            logger.error("OpenAI translation failed for chunk %s: %s", chunk.index, exc)
+            logger.error("OpenAI %s failed for chunk %s: %s", stage, chunk.index, exc)
             raise RuntimeError(
-                f"OpenAI translation failed for chunk {chunk.index}: {exc}"
+                f"OpenAI {stage} failed for chunk {chunk.index}: {exc}"
             ) from exc
-
-    def configure_glossary(self, glossary_terms: Sequence[GlossaryTerm]) -> None:
-        """Inject glossary terms into prompt generation at runtime."""
-        self.prompt_builder.set_glossary_terms(glossary_terms)
 
     @staticmethod
     def _extract_output_text(response) -> str:
-        """Extract text from a Responses API object."""
         output_text = getattr(response, "output_text", None)
         if isinstance(output_text, str) and output_text.strip():
             return output_text.strip()
@@ -254,7 +282,6 @@ class OpenAITranslator(BaseTranslator):
 
     @staticmethod
     def _extract_usage_metadata(response) -> Dict[str, int]:
-        """Extract token usage metadata from a Responses API object, if available."""
         usage_obj = getattr(response, "usage", None)
         if usage_obj is None:
             return {}
@@ -268,7 +295,6 @@ class OpenAITranslator(BaseTranslator):
 
     @staticmethod
     def _normalize_language(language: str) -> str:
-        """Convert short language codes to readable names for prompts."""
         mapping = {
             "en": "English",
             "es": "Spanish",
@@ -283,16 +309,11 @@ class OpenAITranslator(BaseTranslator):
         return mapping.get(key, language)
 
     def get_name(self) -> str:
-        """Return the name of this translator."""
         return f"OpenAITranslator({self.model})"
 
 
 class TranslatorFactory:
-    """
-    Factory for creating translator instances.
-
-    Supports pluggable translator types and future extensibility.
-    """
+    """Factory for creating translator instances."""
 
     _translators = {
         "mock": MockTranslator,
@@ -308,24 +329,8 @@ class TranslatorFactory:
         api_key: Optional[str] = None,
         model: str = "gpt-5.2",
         glossary_terms: Optional[Sequence[GlossaryTerm]] = None,
+        style_profile: Optional[StyleProfile] = None,
     ) -> BaseTranslator:
-        """
-        Create a translator instance.
-
-        Args:
-            translator_type: Type of translator ('mock' or 'openai')
-            source_language: Source language name
-            target_language: Target language name
-            api_key: Optional API key for translation service
-            model: OpenAI model name when using OpenAI translator
-            glossary_terms: Optional glossary terms for prompt-aware translators
-
-        Returns:
-            A BaseTranslator instance
-
-        Raises:
-            ValueError: If translator type is not supported
-        """
         if translator_type not in cls._translators:
             raise ValueError(
                 f"Unknown translator type: {translator_type}. "
@@ -343,20 +348,41 @@ class TranslatorFactory:
                 source_language=source_language,
                 target_language=target_language,
                 glossary_terms=glossary_terms,
+                style_profile=style_profile,
             )
 
         raise ValueError(f"Cannot create translator: {translator_type}")
 
     @classmethod
     def register(cls, translator_type: str, translator_class: type) -> None:
-        """
-        Register a new translator type.
-
-        Allows future extensibility for additional translator backends.
-
-        Args:
-            translator_type: Key for the translator type
-            translator_class: Class implementing BaseTranslator
-        """
         cls._translators[translator_type] = translator_class
         logger.info("Registered translator type: %s", translator_type)
+
+
+def _sanitize_prompt_metadata(prompt_metadata: Optional[dict]) -> Dict[str, object]:
+    """Return prompt metadata stripped to JSON-safe observability fields."""
+    if not prompt_metadata:
+        return {}
+
+    safe: Dict[str, object] = {}
+    chunk_signal = prompt_metadata.get("chunk_signal")
+    if isinstance(chunk_signal, str):
+        safe["chunk_signal"] = chunk_signal
+
+    context_snapshot = prompt_metadata.get("context_snapshot")
+    if isinstance(context_snapshot, dict):
+        safe["context_snapshot"] = context_snapshot
+
+    relevant_terms = prompt_metadata.get("relevant_glossary_terms")
+    if isinstance(relevant_terms, list):
+        rendered_terms = []
+        for item in relevant_terms:
+            term = getattr(item, "term", None)
+            source = getattr(term, "source", None) if term is not None else None
+            target = getattr(term, "target", None) if term is not None else None
+            if isinstance(source, str) and isinstance(target, str):
+                rendered_terms.append(f"{source} -> {target}")
+        if rendered_terms:
+            safe["relevant_glossary_terms"] = rendered_terms
+
+    return safe

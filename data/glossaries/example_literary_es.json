@@ -1,0 +1,24 @@
+﻿{
+  "terms": [
+    {
+      "source": "Princess Donut",
+      "target": "Princesa Donut",
+      "notes": "Keep title and pet-name identity consistent",
+      "policy": "forced",
+      "case_sensitive": false
+    },
+    {
+      "source": "transformation",
+      "target": "transformación",
+      "policy": "preferred",
+      "case_sensitive": false
+    },
+    {
+      "source": "Mana Core",
+      "target": "Núcleo de maná",
+      "notes": "Fantasy term used in later chapters",
+      "policy": "forced",
+      "case_sensitive": true
+    }
+  ]
+}

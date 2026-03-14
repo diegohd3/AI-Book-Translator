@@ -1,4 +1,4 @@
-import tempfile
+﻿import tempfile
 import unittest
 from pathlib import Path
 
@@ -13,7 +13,7 @@ class TranslationCacheTests(unittest.TestCase):
             cache.initialize_schema()
 
             source_text = "Mana Core is stable."
-            translated_text = "El Núcleo de maná es estable."
+            translated_text = "El Nucleo de mana es estable."
 
             cache.store_cached_translation(
                 source_text=source_text,
