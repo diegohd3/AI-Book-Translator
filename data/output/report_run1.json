@@ -1,0 +1,18 @@
+{
+  "input_file": "data\\input\\book.txt",
+  "output_file": "data\\output\\book_es.txt",
+  "translator_backend": "mock",
+  "model": "gpt-5.2",
+  "source_language": "en",
+  "target_language": "es",
+  "total_chunks": 1,
+  "translated_chunks": 1,
+  "cache_hits": 0,
+  "cache_misses": 1,
+  "translation_memory_hits": 0,
+  "estimated_token_usage": null,
+  "started_at": "2026-03-13T23:13:41.419078+00:00",
+  "finished_at": "2026-03-13T23:13:41.460908+00:00",
+  "elapsed_seconds": 0.0418,
+  "errors": []
+}
