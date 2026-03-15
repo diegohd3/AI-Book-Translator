@@ -207,3 +207,29 @@ Run all tests:
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
 ```
+
+## Quality Gate
+
+Run a deterministic quality gate using the generated JSON report:
+
+```bash
+python main.py \
+  --input data/input/sample_literary_excerpt.txt \
+  --output data/output/ci_sample_es.txt \
+  --translator mock \
+  --style-profile data/style_profiles/example_literary_es.json \
+  --glossary data/glossaries/example_literary_es.json \
+  --enable-refinement \
+  --cache-db data/cache/ci_translation_store.sqlite3 \
+  --report-output data/output/ci_sample_es.report.json
+
+python quality_gate.py \
+  --report data/output/ci_sample_es.report.json \
+  --max-errors 0 \
+  --max-risks 0 \
+  --max-uncertain 0 \
+  --max-warning-chunks 0 \
+  --max-refinement-drift 0.55
+```
+
+CI automation is included in `.github/workflows/ci.yml`.

@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test-and-quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Generate mock translation report
+        run: |
+          python main.py \
+            --input data/input/sample_literary_excerpt.txt \
+            --output data/output/ci_sample_es.txt \
+            --translator mock \
+            --style-profile data/style_profiles/example_literary_es.json \
+            --glossary data/glossaries/example_literary_es.json \
+            --enable-refinement \
+            --cache-db data/cache/ci_translation_store.sqlite3 \
+            --report-output data/output/ci_sample_es.report.json
+
+      - name: Enforce report quality gate
+        run: |
+          python quality_gate.py \
+            --report data/output/ci_sample_es.report.json \
+            --max-errors 0 \
+            --max-risks 0 \
+            --max-uncertain 0 \
+            --max-warning-chunks 0 \
+            --max-refinement-drift 0.55
