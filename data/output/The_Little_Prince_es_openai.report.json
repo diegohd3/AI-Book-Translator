@@ -1,0 +1,399 @@
+{
+  "input_file": "data\\input\\The_Little_Prince_by_Antoine_de_Saint-Exup_233_ry.epub",
+  "output_file": "data\\output\\The_Little_Prince_es_openai.epub",
+  "translator_backend": "openai",
+  "model": "gpt-5.2",
+  "source_language": "en",
+  "target_language": "es",
+  "total_chunks": 17,
+  "translated_chunks": 17,
+  "cache_hits": 0,
+  "cache_misses": 17,
+  "translation_memory_hits": 0,
+  "estimated_token_usage": 76668,
+  "started_at": "2026-03-16T02:01:59.698448+00:00",
+  "finished_at": "2026-03-16T02:09:30.970640+00:00",
+  "elapsed_seconds": 451.2722,
+  "errors": [],
+  "style_profile_hash": "2bcf3e094580a9f2aeb783f54acdab9bd273a296b607b3878816dbe21eeee378",
+  "style_profile": {
+    "source_language": "en",
+    "target_language": "es",
+    "genre": "poetic allegorical novella for all ages",
+    "tone": "tender, contemplative, luminous, with gentle melancholy",
+    "audience": "young readers and reflective adults",
+    "formality": "neutral-simple and warm",
+    "translation_strategy": "faithful literary translation with clear syntax, brevity, and symbolic resonance",
+    "author_voice_notes": "preserve innocence, wonder, philosophical subtext, and short rhythmic phrasing",
+    "dialogue_style": "natural, concise neutral Spanish with childlike clarity and emotional sincerity",
+    "narrator_style": "intimate first-person voice, calm cadence, subtle irony, and restrained lyricism",
+    "forbidden_patterns": [
+      "word-by-word calques",
+      "overly literal English syntax",
+      "over-explained abstract prose",
+      "heavy regional slang or localisms",
+      "ornate baroque phrasing that breaks simplicity"
+    ],
+    "preferred_patterns": [
+      "short musical sentences",
+      "clean imagery and coherent symbolism",
+      "gentle emotional tone with restrained melancholy",
+      "simple but poetic diction"
+    ]
+  },
+  "policy_hash": "f4533f0a74130cbdf35b7d22c48cbdf022449c0fd2b98e6a1d163c0b9913577e",
+  "glossary_total_terms": 0,
+  "glossary_matches_relevant": {},
+  "glossary_matches_used": {},
+  "recurring_terms": {
+    "characters": [
+      "But",
+      "The",
+      "It",
+      "He",
+      "And",
+      "You",
+      "What",
+      "That",
+      "Then",
+      "They"
+    ],
+    "places": [
+      "Africa"
+    ],
+    "invented_terms": [
+      "CHAPTER",
+      "grown-ups",
+      "show-off",
+      "Grown-ups",
+      "B-",
+      "fifty-three",
+      "forty-four",
+      "red-faced",
+      "twenty-two",
+      "LITTLE"
+    ],
+    "key_repeated_phrases": [
+      "the little",
+      "it is",
+      "little prince",
+      "the little prince",
+      "he said",
+      "in the",
+      "said to",
+      "it was",
+      "of the",
+      "said the"
+    ]
+  },
+  "consistency_risks": [],
+  "uncertain_translations": [],
+  "chunks": [
+    {
+      "index": 0,
+      "word_count": 995,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 1,
+      "word_count": 964,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 2,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 3,
+      "word_count": 902,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 4,
+      "word_count": 992,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 5,
+      "word_count": 990,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 6,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 7,
+      "word_count": 982,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 8,
+      "word_count": 993,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 9,
+      "word_count": 944,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 10,
+      "word_count": 952,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 11,
+      "word_count": 993,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 12,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 13,
+      "word_count": 996,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 0.7917,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 14,
+      "word_count": 1000,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 15,
+      "word_count": 984,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 16,
+      "word_count": 709,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "OpenAITranslator(gpt-5.2)",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [],
+      "diagnostics": {
+        "dialogue_score": 0.8333,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    }
+  ]
+}

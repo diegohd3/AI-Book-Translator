@@ -1,6 +1,6 @@
 ﻿# TranslateBook
 
-AI-assisted modular literary translation pipeline for TXT documents.
+AI-assisted modular literary translation pipeline for TXT and EPUB documents.
 
 ## Literary Translation Intelligence Phase
 
@@ -20,9 +20,9 @@ This phase upgrades the MVP with literary quality controls while preserving the 
 
 ## Scope
 
-- Input: TXT only
-- Output: TXT only + JSON report
-- No EPUB/PDF/UI in this phase
+- Input: TXT or EPUB
+- Output: TXT or EPUB + JSON report
+- EPUB flow preserves manifest/spine/nav/TOC/resources while translating readable XHTML text nodes
 
 ## Project Structure
 
@@ -31,7 +31,9 @@ TranslateBook/
 |-- main.py
 |-- config.py
 |-- models.py
+|-- document_format.py
 |-- txt_extractor.py
+|-- epub_extractor.py
 |-- cleaner.py
 |-- chunker.py
 |-- chunk_signals.py
@@ -43,6 +45,7 @@ TranslateBook/
 |-- cache.py
 |-- translation_memory.py
 |-- assembler.py
+|-- epub_assembler.py
 |-- reporting.py
 |-- pipeline.py
 |-- normalization.py
@@ -65,6 +68,12 @@ TranslateBook/
 
 ```bash
 python main.py --input data/input/book.txt --output data/output/book_es.txt
+```
+
+### EPUB translation
+
+```bash
+python main.py --input data/input/book.epub --output data/output/book_es.epub
 ```
 
 ### Literary profile + glossary + refinement
@@ -100,12 +109,13 @@ python main.py --input data/input/book.txt --output data/output/book_es.txt --di
 
 ### Required
 
-- `--input`, `-i`: input TXT path
-- `--output`, `-o`: output TXT path
+- `--input`, `-i`: input path (`.txt` or `.epub`)
+- `--output`, `-o`: output path (`.txt` or `.epub`)
 
 ### Core optional
 
 - `--chunk-size`: target words per chunk (100-5000, default `1000`)
+- `--input-format`: optional override (`auto`, `txt`, `epub`; default `auto`)
 - `--translator`: `mock` or `openai` (default `mock`)
 - `--api-key`: OpenAI API key (or use `OPENAI_API_KEY`)
 - `--model`: OpenAI model (default `OPENAI_MODEL` or `gpt-5.2`)
@@ -179,6 +189,14 @@ Per chunk:
 8. Run consistency heuristics and warnings
 9. Update context memory
 10. Persist final translation to cache/TM
+
+EPUB-specific notes:
+
+- Extracts translatable XHTML text nodes across the full book in spine order (plus remaining XHTML docs)
+- Wraps each text segment with placeholders so inline markup and node boundaries remain stable
+- Reassembles translated text into original XHTML nodes
+- Preserves binary resources (images, fonts, CSS) without modification
+- Updates package language metadata (`dc:language`) to target language
 
 ## Report Output
 

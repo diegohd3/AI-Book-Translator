@@ -1,22 +1,25 @@
 ﻿{
   "source_language": "en",
   "target_language": "es",
-  "genre": "contemporary literary fiction",
-  "tone": "dramatic and intimate",
-  "audience": "adult readers",
-  "formality": "neutral",
-  "translation_strategy": "faithful literary translation prioritizing natural Spanish flow",
-  "author_voice_notes": "preserve irony, emotional subtext, and sentence rhythm",
-  "dialogue_style": "idiomatic Mexican/neutral Spanish that sounds native",
-  "narrator_style": "fluid, immersive narrator voice with subtle tension",
+  "genre": "poetic allegorical novella for all ages",
+  "tone": "tender, contemplative, luminous, with gentle melancholy",
+  "audience": "young readers and reflective adults",
+  "formality": "neutral-simple and warm",
+  "translation_strategy": "faithful literary translation with clear syntax, brevity, and symbolic resonance",
+  "author_voice_notes": "preserve innocence, wonder, philosophical subtext, and short rhythmic phrasing",
+  "dialogue_style": "natural, concise neutral Spanish with childlike clarity and emotional sincerity",
+  "narrator_style": "intimate first-person voice, calm cadence, subtle irony, and restrained lyricism",
   "forbidden_patterns": [
     "word-by-word calques",
     "overly literal English syntax",
-    "robotic repetitive sentence openings"
+    "over-explained abstract prose",
+    "heavy regional slang or localisms",
+    "ornate baroque phrasing that breaks simplicity"
   ],
   "preferred_patterns": [
-    "natural idiomatic Spanish dialogue",
-    "dramatic pacing preserved",
-    "cohesive paragraph cadence"
+    "short musical sentences",
+    "clean imagery and coherent symbolism",
+    "gentle emotional tone with restrained melancholy",
+    "simple but poetic diction"
   ]
 }

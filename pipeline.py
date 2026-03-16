@@ -19,6 +19,7 @@ from chunker import TextChunker
 from cleaner import TextCleaner
 from config import TranslationConfig
 from context_memory import BookContextMemory
+from document_format import detect_document_format
 from glossary import (
     Glossary,
     GlossaryMatch,
@@ -44,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 _UNCERTAIN_RE = re.compile(r"\?\?|\[uncertain\]|\(unclear\)", flags=re.IGNORECASE)
 _ASCII_WORD_RE = re.compile(r"\b[a-zA-Z]{3,}\b")
+_EPUB_SEGMENT_MARKER_RE = re.compile(r"\[\[TB_SEG_\d{6}_(?:START|END)\]\]")
 _ENGLISH_HINT_WORDS = {
     "the",
     "and",
@@ -66,11 +68,28 @@ class TranslationPipeline:
 
     def __init__(self, config: TranslationConfig):
         self.config = config
-        self.extractor = TxtExtractor(encoding="utf-8")
         self.cleaner = TextCleaner(preserve_paragraphs=True)
         self.chunker = TextChunker(target_chunk_size=config.chunk_size)
-        self.assembler = TranslationAssembler()
+        self.document_format = detect_document_format(
+            self.config.input_path,
+            self.config.input_format,
+        )
+        self.extractor, self.assembler, self._requires_cleaning = self._build_document_io()
         self.translator = self._create_translator()
+
+    def _build_document_io(self):
+        """Create extractor/assembler pair based on input format."""
+        if self.document_format == "txt":
+            return TxtExtractor(encoding="utf-8"), TranslationAssembler(), True
+
+        if self.document_format == "epub":
+            from epub_assembler import EpubAssembler
+            from epub_extractor import EpubExtractor
+
+            epub_extractor = EpubExtractor()
+            return epub_extractor, EpubAssembler(epub_extractor), False
+
+        raise ValueError(f"Unsupported document format: {self.document_format}")
 
     def _create_translator(self) -> BaseTranslator:
         """Create a translator instance based on configuration."""
@@ -115,6 +134,7 @@ class TranslationPipeline:
         logger.info("Starting literary translation pipeline")
         logger.info("Input: %s", self.config.input_path)
         logger.info("Output: %s", self.config.output_path)
+        logger.info("Detected format: %s", self.document_format)
         logger.info("Report: %s", self.config.report_output_path)
         logger.info("Translator: %s", self.translator.get_name())
         logger.info("Refinement enabled: %s", self.config.enable_refinement)
@@ -147,8 +167,12 @@ class TranslationPipeline:
             logger.info("Step 1: Extracting text from file...")
             original_text = self.extractor.extract(self.config.input_path)
 
-            logger.info("Step 2: Cleaning text...")
-            cleaned_text = self.cleaner.clean(original_text)
+            if self._requires_cleaning:
+                logger.info("Step 2: Cleaning text...")
+                cleaned_text = self.cleaner.clean(original_text)
+            else:
+                logger.info("Step 2: Cleaning skipped for format '%s'", self.document_format)
+                cleaned_text = original_text
 
             logger.info("Step 3: Chunking text...")
             chunks = self.chunker.chunk(cleaned_text)
@@ -166,8 +190,14 @@ class TranslationPipeline:
                     chunk.word_count,
                 )
 
-                chunk_signal = analyze_chunk_signal(chunk.original_text)
-                relevant_matches = find_relevant_terms(chunk.original_text, glossary.terms)
+                source_text_for_analysis = self._strip_epub_segment_markers(
+                    chunk.original_text
+                )
+                chunk_signal = analyze_chunk_signal(source_text_for_analysis)
+                relevant_matches = find_relevant_terms(
+                    source_text_for_analysis,
+                    glossary.terms,
+                )
 
                 snapshot = {}
                 if context_memory is not None:
@@ -320,8 +350,11 @@ class TranslationPipeline:
                         )
 
                 relevant_sources = [match.term.source for match in relevant_matches]
+                translated_text_for_analysis = self._strip_epub_segment_markers(
+                    translated.translated_text
+                )
                 used_targets = find_used_glossary_terms(
-                    translated.translated_text,
+                    translated_text_for_analysis,
                     relevant_matches,
                 )
                 used_lookup = {item.casefold() for item in used_targets}
@@ -332,7 +365,7 @@ class TranslationPipeline:
                 ]
 
                 warnings = self._build_chunk_warnings(
-                    translated=translated,
+                    translated_text=translated_text_for_analysis,
                     relevant_matches=relevant_matches,
                     used_targets=used_targets,
                     refinement_drift=refinement_drift,
@@ -341,8 +374,8 @@ class TranslationPipeline:
                 if context_memory is not None:
                     context_memory.update_from_chunk(
                         chunk_index=chunk.index,
-                        source_text=chunk.original_text,
-                        translated_text=translated.translated_text,
+                        source_text=source_text_for_analysis,
+                        translated_text=translated_text_for_analysis,
                         chunk_signal=chunk_signal.label,
                         glossary_matches=relevant_matches,
                         glossary_used=used_targets,
@@ -614,7 +647,8 @@ class TranslationPipeline:
         """Compute policy hash used to partition cache/TM reuse."""
         payload = (
             f"style:{style_profile_hash}|glossary:{glossary_hash}|"
-            f"refinement:{self.config.enable_refinement}|context:{self.config.context_window}"
+            f"refinement:{self.config.enable_refinement}|context:{self.config.context_window}|"
+            f"format:{self.document_format}"
         )
         return sha256_hexdigest(payload)
 
@@ -627,7 +661,7 @@ class TranslationPipeline:
     def _build_chunk_warnings(
         self,
         *,
-        translated: TranslatedChunk,
+        translated_text: str,
         relevant_matches: Sequence[GlossaryMatch],
         used_targets: Sequence[str],
         refinement_drift: Optional[float],
@@ -645,17 +679,17 @@ class TranslationPipeline:
                 f"RISK: large refinement drift ({refinement_drift}) may indicate meaning shift"
             )
 
-        untranslated_spans = self._find_untranslated_english_spans(translated.translated_text)
+        untranslated_spans = self._find_untranslated_english_spans(translated_text)
         if untranslated_spans:
             warnings.append(
                 "RISK: possible untranslated English span(s): "
                 + " | ".join(untranslated_spans[:2])
             )
 
-        if _UNCERTAIN_RE.search(translated.translated_text):
+        if _UNCERTAIN_RE.search(translated_text):
             warnings.append("UNCERTAIN: translation contains uncertainty markers")
 
-        if not translated.translated_text.strip():
+        if not translated_text.strip():
             warnings.append("UNCERTAIN: empty translated output")
 
         return warnings
@@ -699,12 +733,23 @@ class TranslationPipeline:
             if match.term.target.casefold() in used_lookup:
                 used_counter[key] = used_counter.get(key, 0) + 1
 
+    def _strip_epub_segment_markers(self, text: str) -> str:
+        """Remove marker placeholders used for EPUB segment round-tripping."""
+        if self.document_format != "epub":
+            return text
+
+        stripped = _EPUB_SEGMENT_MARKER_RE.sub("", text)
+        stripped = re.sub(r"\n{3,}", "\n\n", stripped)
+        return stripped.strip()
+
     def _write_output(self, text: str) -> None:
-        """Write translated text to output file."""
+        """Write translated output using format-specific assembler."""
         try:
-            with open(self.config.output_path, "w", encoding="utf-8") as handle:
-                handle.write(text)
-            logger.info("Output written to: %s", self.config.output_path)
+            self.assembler.write_output(
+                self.config.output_path,
+                text,
+                self.config.target_language,
+            )
         except IOError as exc:
             logger.error("Failed to write output file: %s", exc)
             raise

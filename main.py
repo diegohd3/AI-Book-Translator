@@ -27,19 +27,39 @@ def setup_logging(verbose: bool = False) -> None:
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Translate TXT files with literary-aware translation intelligence",
+        description="Translate TXT or EPUB files with literary-aware translation intelligence",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   python main.py --input book.txt --output book_es.txt
+  python main.py --input novel.epub --output novel_es.epub
   python main.py --input book.txt --output book_es.txt --translator openai --api-key sk-...
   python main.py --input book.txt --output book_es.txt --style-profile data/style_profiles/example_literary_es.json --glossary data/glossaries/example_literary_es.json --enable-refinement
   python main.py --input book.txt --output book_es.txt --report-output data/output/book_es.report.json
         """,
     )
 
-    parser.add_argument("--input", "-i", type=str, required=True, help="Path to input TXT file")
-    parser.add_argument("--output", "-o", type=str, required=True, help="Path for output TXT file")
+    parser.add_argument(
+        "--input",
+        "-i",
+        type=str,
+        required=True,
+        help="Path to input file (.txt or .epub)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        required=True,
+        help="Path for output file (.txt or .epub)",
+    )
+    parser.add_argument(
+        "--input-format",
+        type=str,
+        choices=["auto", "txt", "epub"],
+        default="auto",
+        help="Optional input format override (default: auto by extension)",
+    )
 
     parser.add_argument(
         "--chunk-size",
@@ -173,6 +193,7 @@ def main() -> int:
             disable_cache=args.disable_cache,
             disable_translation_memory=args.disable_tm,
             report_output_path=Path(report_output_value) if report_output_value else None,
+            input_format=args.input_format,
         )
 
         pipeline = TranslationPipeline(config)

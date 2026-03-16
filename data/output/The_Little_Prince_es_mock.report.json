@@ -1,0 +1,446 @@
+{
+  "input_file": "data\\input\\The_Little_Prince_by_Antoine_de_Saint-Exup_233_ry.epub",
+  "output_file": "data\\output\\The_Little_Prince_es_mock.epub",
+  "translator_backend": "mock",
+  "model": "gpt-5.2",
+  "source_language": "en",
+  "target_language": "es",
+  "total_chunks": 17,
+  "translated_chunks": 17,
+  "cache_hits": 0,
+  "cache_misses": 17,
+  "translation_memory_hits": 0,
+  "estimated_token_usage": null,
+  "started_at": "2026-03-16T01:56:38.857369+00:00",
+  "finished_at": "2026-03-16T01:56:39.213067+00:00",
+  "elapsed_seconds": 0.3557,
+  "errors": [],
+  "style_profile_hash": "c1d7cb015171b3cf5eb040ad4c8c3f21f93f0012e4c86f537e450da21e3cc17e",
+  "style_profile": {
+    "source_language": "en",
+    "target_language": "es",
+    "genre": "general literary",
+    "tone": "faithful literary tone",
+    "audience": "adult general readers",
+    "formality": "neutral",
+    "translation_strategy": "faithful literary translation with natural Spanish flow",
+    "author_voice_notes": "preserve narrative rhythm, subtext, and emotional intent",
+    "dialogue_style": "native, idiomatic Spanish dialogue with distinct character voices",
+    "narrator_style": "fluid literary narrator voice, avoid robotic syntax",
+    "forbidden_patterns": [
+      "literal word-by-word calques",
+      "mechanical syntax that sounds translated"
+    ],
+    "preferred_patterns": [
+      "natural Spanish phrasing",
+      "cohesive paragraph rhythm"
+    ]
+  },
+  "policy_hash": "fb5eb0fd042c2964955cfb93db5b8a1730a9635bada58fb94dbd9e4b8e91ce9d",
+  "glossary_total_terms": 0,
+  "glossary_matches_relevant": {},
+  "glossary_matches_used": {},
+  "recurring_terms": {
+    "characters": [
+      "But",
+      "The",
+      "It",
+      "He",
+      "And",
+      "You",
+      "What",
+      "That",
+      "Then",
+      "They"
+    ],
+    "places": [
+      "Africa"
+    ],
+    "invented_terms": [
+      "CHAPTER",
+      "grown-ups",
+      "show-off",
+      "Grown-ups",
+      "B-",
+      "fifty-three",
+      "forty-four",
+      "red-faced",
+      "twenty-two",
+      "LITTLE"
+    ],
+    "key_repeated_phrases": [
+      "the little",
+      "it is",
+      "little prince",
+      "the little prince",
+      "he said",
+      "in the",
+      "said to",
+      "it was",
+      "of the",
+      "said the"
+    ]
+  },
+  "consistency_risks": [
+    "chunk 0: RISK: possible untranslated English span(s): CHAPTER CHAPTER CHAPTER CHAPTER CHAPTER was | CHAPTER CHAPTER CHAPTER CHAPTER was six",
+    "chunk 10: RISK: possible untranslated English span(s): But not waste your time this | not waste your time this task",
+    "chunk 11: RISK: possible untranslated English span(s): MOCK TRANSLATION She would | MOCK TRANSLATION She would very",
+    "chunk 12: RISK: possible untranslated English span(s): little prince tamed fox when was | prince tamed fox when was time",
+    "chunk 13: RISK: possible untranslated English span(s): TRANSLATION could not understand what was | could not understand what was saying",
+    "chunk 14: RISK: possible untranslated English span(s): are blind One must see with | blind One must see with heart",
+    "chunk 15: RISK: possible untranslated English span(s): year Little man said tell this | Little man said tell this all",
+    "chunk 16: RISK: possible untranslated English span(s): little prince back his planet because | prince back his planet because next",
+    "chunk 1: RISK: possible untranslated English span(s): thing frequently drew boa constrictor from | frequently drew boa constrictor from outside",
+    "chunk 2: RISK: possible untranslated English span(s): you these details about asteroid because | these details about asteroid because grown",
+    "chunk 3: RISK: possible untranslated English span(s): children your planet about baobabs This | your planet about baobabs This would",
+    "chunk 4: RISK: possible untranslated English span(s): not What told you know this | What told you know this one",
+    "chunk 5: RISK: possible untranslated English span(s): TRANSLATION believe little prince escaped with | believe little prince escaped with help",
+    "chunk 6: RISK: possible untranslated English span(s): such power wielded such authority would | power wielded such authority would not",
+    "chunk 7: RISK: possible untranslated English span(s): drunkard little prince visit here was | little prince visit here was brief",
+    "chunk 8: RISK: possible untranslated English span(s): also clean out extinct one because | clean out extinct one because one",
+    "chunk 9: RISK: possible untranslated English span(s): know said geographer little prince was | said geographer little prince was disappointed"
+  ],
+  "uncertain_translations": [],
+  "chunks": [
+    {
+      "index": 0,
+      "word_count": 995,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): CHAPTER CHAPTER CHAPTER CHAPTER CHAPTER was | CHAPTER CHAPTER CHAPTER CHAPTER was six"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 1,
+      "word_count": 964,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): thing frequently drew boa constrictor from | frequently drew boa constrictor from outside"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 2,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): you these details about asteroid because | these details about asteroid because grown"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 3,
+      "word_count": 902,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): children your planet about baobabs This | your planet about baobabs This would"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 4,
+      "word_count": 992,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): not What told you know this | What told you know this one"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 5,
+      "word_count": 990,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): TRANSLATION believe little prince escaped with | believe little prince escaped with help"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 6,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): such power wielded such authority would | power wielded such authority would not"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 7,
+      "word_count": 982,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): drunkard little prince visit here was | little prince visit here was brief"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 8,
+      "word_count": 993,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): also clean out extinct one because | clean out extinct one because one"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 9,
+      "word_count": 944,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): know said geographer little prince was | said geographer little prince was disappointed"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 10,
+      "word_count": 952,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): But not waste your time this | not waste your time this task"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 11,
+      "word_count": 993,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): MOCK TRANSLATION She would | MOCK TRANSLATION She would very"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 12,
+      "word_count": 991,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): little prince tamed fox when was | prince tamed fox when was time"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 13,
+      "word_count": 996,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): TRANSLATION could not understand what was | could not understand what was saying"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 0.7917,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 14,
+      "word_count": 1000,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): are blind One must see with | blind One must see with heart"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 15,
+      "word_count": 984,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): year Little man said tell this | Little man said tell this all"
+      ],
+      "diagnostics": {
+        "dialogue_score": 1.0,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    },
+    {
+      "index": 16,
+      "word_count": 709,
+      "chunk_signal": "mixed",
+      "translation_source": "translator",
+      "refinement_enabled": false,
+      "refinement_applied": false,
+      "stage1_translator": "MockTranslator",
+      "stage2_translator": null,
+      "glossary_relevant": [],
+      "glossary_used": [],
+      "warnings": [
+        "RISK: possible untranslated English span(s): little prince back his planet because | prince back his planet because next"
+      ],
+      "diagnostics": {
+        "dialogue_score": 0.8333,
+        "emphasis_score": 1.0,
+        "refinement_drift": null
+      }
+    }
+  ]
+}

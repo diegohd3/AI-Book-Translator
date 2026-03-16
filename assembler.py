@@ -5,7 +5,9 @@ Reassembles translated chunks while maintaining order and structure.
 """
 
 import logging
+from pathlib import Path
 from typing import List
+
 from models import TranslatedChunk
 
 logger = logging.getLogger(__name__)
@@ -61,6 +63,20 @@ class TranslationAssembler:
         )
 
         return assembled_text
+
+    def write_output(self, output_path: Path, text: str, target_language: str) -> None:
+        """
+        Write assembled translation output to disk.
+
+        Args:
+            output_path: Destination file path
+            text: Assembled translated text
+            target_language: Target language code (reserved for format-specific assemblers)
+        """
+        _ = target_language
+        with open(output_path, "w", encoding="utf-8") as handle:
+            handle.write(text)
+        logger.info("Output written to: %s", output_path)
 
     def verify_assembly(
         self, original_chunks: List[TranslatedChunk], assembled: str

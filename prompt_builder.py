@@ -57,6 +57,10 @@ class PromptBuilder:
             "Preserve literary flow, author intent, emotion, and paragraph structure.",
             "Produce natural, idiomatic Spanish that does not sound machine-translated.",
             "Avoid literal mechanical phrasing and keep character voices differentiated.",
+            (
+                "If placeholder tokens like [[TB_SEG_000001_START]] or "
+                "[[TB_SEG_000001_END]] appear, keep them unchanged and in the same order."
+            ),
         ]
 
         lines.extend(self._build_style_block())
@@ -94,6 +98,9 @@ class PromptBuilder:
             f"Task: {self.source_language} -> {self.target_language} literary translation."
         )
         lines.append(self._build_signal_instruction(chunk_signal))
+        lines.append(
+            "Preserve marker placeholders (for example [[TB_SEG_000001_START]]) exactly."
+        )
 
         context_block = self._build_context_block(context_snapshot)
         if context_block:

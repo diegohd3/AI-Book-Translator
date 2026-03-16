@@ -4,10 +4,11 @@ Centralized configuration for the translation application.
 Defines default values and settings that can be overridden at runtime.
 """
 
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
+from document_format import AUTO_FORMAT, SUPPORTED_FORMATS, normalize_format_name
 from style_profile import validate_style_profile_file
 
 
@@ -33,6 +34,7 @@ class TranslationConfig:
         disable_cache: Disable cache lookups/storage when True
         disable_translation_memory: Disable translation memory lookups/storage when True
         report_output_path: Output path for JSON report sidecar
+        input_format: Optional explicit input format ('txt', 'epub', or 'auto')
     """
 
     input_path: Path
@@ -51,6 +53,7 @@ class TranslationConfig:
     disable_cache: bool = False
     disable_translation_memory: bool = False
     report_output_path: Optional[Path] = None
+    input_format: Optional[str] = None
 
     def __post_init__(self):
         """Validate configuration on creation."""
@@ -66,6 +69,8 @@ class TranslationConfig:
             self.cache_db_path = Path(self.cache_db_path)
         if isinstance(self.report_output_path, str):
             self.report_output_path = Path(self.report_output_path)
+        if isinstance(self.input_format, str):
+            self.input_format = self.input_format.strip()
 
         if self.chunk_size < 100:
             raise ValueError("Chunk size must be at least 100 words")
@@ -79,6 +84,13 @@ class TranslationConfig:
             raise ValueError("cache_db_path cannot be None")
         if self.context_window < 1:
             raise ValueError("context_window must be >= 1")
+        normalized_format = normalize_format_name(self.input_format)
+        if normalized_format and normalized_format != AUTO_FORMAT:
+            if normalized_format not in SUPPORTED_FORMATS:
+                raise ValueError(
+                    f"input_format must be one of: {', '.join(sorted(SUPPORTED_FORMATS))}, auto"
+                )
+        self.input_format = normalized_format
 
         if self.style_profile_path is not None:
             validate_style_profile_file(self.style_profile_path)
