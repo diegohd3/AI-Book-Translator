@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections import deque
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from typing import Dict, List, Optional, Sequence
@@ -130,6 +131,7 @@ class TranslationPipeline:
         )
         style_profile_hash = style_profile.profile_hash()
         policy_hash = ""
+        cache_model_key = ""
         glossary_hash = "no_glossary"
         glossary_total_terms = 0
         recurring_terms: Dict[str, List[str]] = {}
@@ -162,6 +164,7 @@ class TranslationPipeline:
                 style_profile_hash=style_profile_hash,
                 glossary_hash=glossary_hash,
             )
+            cache_model_key = self._cache_model_key(policy_hash)
 
             context_memory = BookContextMemory(style_profile)
 
@@ -225,7 +228,7 @@ class TranslationPipeline:
                             source_text=chunk.original_text,
                             source_language=self.config.source_language,
                             target_language=self.config.target_language,
-                            model=self._cache_model_key(policy_hash),
+                            model=cache_model_key,
                             glossary_hash=policy_hash,
                         )
                         if cached_text is not None:
@@ -240,10 +243,7 @@ class TranslationPipeline:
                                 },
                             )
                             stage1_translator = translated.translator_used
-                            refinement_applied = (
-                                self.config.enable_refinement
-                                and self.translator.supports_refinement()
-                            )
+                            refinement_applied = self._is_refinement_applied()
                     except CacheError as exc:
                         message = f"Cache lookup failed for chunk {chunk.index}: {exc}"
                         logger.warning(message)
@@ -264,16 +264,14 @@ class TranslationPipeline:
                             tm_hits += 1
                             translated = self._build_tm_chunk(chunk, tm_match)
                             stage1_translator = translated.translator_used
-                            refinement_applied = (
-                                self.config.enable_refinement
-                                and self.translator.supports_refinement()
-                            )
+                            refinement_applied = self._is_refinement_applied()
                             if cache_layer is not None:
                                 self._safe_store_cache(
                                     cache_layer=cache_layer,
                                     chunk=chunk,
                                     translated_text=translated.translated_text,
                                     policy_hash=policy_hash,
+                                    cache_model_key=cache_model_key,
                                     errors=errors,
                                 )
                     except TranslationMemoryError as exc:
@@ -299,7 +297,7 @@ class TranslationPipeline:
                             prompt_metadata=prompt_metadata,
                         )
                         stage2_translator = stage2_chunk.translator_used
-                        refinement_applied = self.translator.supports_refinement()
+                        refinement_applied = self._is_refinement_applied()
                         refinement_drift = self._calculate_refinement_drift(
                             stage1_chunk.translated_text,
                             stage2_chunk.translated_text,
@@ -342,6 +340,7 @@ class TranslationPipeline:
                             chunk=chunk,
                             translated_text=translated.translated_text,
                             policy_hash=policy_hash,
+                            cache_model_key=cache_model_key,
                             errors=errors,
                         )
                     if tm_layer is not None:
@@ -555,6 +554,7 @@ class TranslationPipeline:
         chunk: TextChunk,
         translated_text: str,
         policy_hash: str,
+        cache_model_key: str,
         errors: List[str],
     ) -> None:
         """Store cache entry and continue on failures."""
@@ -564,13 +564,17 @@ class TranslationPipeline:
                 translated_text=translated_text,
                 source_language=self.config.source_language,
                 target_language=self.config.target_language,
-                model=self._cache_model_key(policy_hash),
+                model=cache_model_key,
                 glossary_hash=policy_hash,
             )
         except CacheError as exc:
             message = f"Cache store failed for chunk {chunk.index}: {exc}"
             logger.warning(message)
             errors.append(message)
+
+    def _is_refinement_applied(self) -> bool:
+        """Return whether stage-2 refinement can execute for this translator."""
+        return self.config.enable_refinement and self.translator.supports_refinement()
 
     def _safe_store_tm(
         self,
@@ -747,13 +751,15 @@ class TranslationPipeline:
             return []
 
         spans: List[str] = []
-        run: List[str] = []
+        run = deque(maxlen=6)
+        token_count = 0
         for token in words:
+            token_count += 1
             run.append(token)
-            if len(run) >= 4:
-                lower_run = {item.lower() for item in run[-6:]}
+            if token_count >= 4:
+                lower_run = {item.lower() for item in run}
                 if lower_run.intersection(_ENGLISH_HINT_WORDS):
-                    spans.append(" ".join(run[-6:]))
+                    spans.append(" ".join(run))
 
         unique: List[str] = []
         seen = set()

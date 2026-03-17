@@ -4,15 +4,13 @@ SQLite-backed persistent translation cache.
 
 from __future__ import annotations
 
-import logging
 import sqlite3
 from contextlib import closing
 from pathlib import Path
 from typing import Optional, Union
 
 from normalization import build_deterministic_key, normalize_text_for_lookup
-
-logger = logging.getLogger(__name__)
+from sqlite_utils import ensure_sqlite_parent_dir, open_sqlite_row_connection
 
 
 class CacheError(RuntimeError):
@@ -30,17 +28,11 @@ class TranslationCache:
 
     def _prepare_storage_path(self) -> None:
         """Create parent directory for SQLite file when needed."""
-        if self.db_path == ":memory:":
-            return
-        path = Path(self.db_path)
-        if path.parent:
-            path.parent.mkdir(parents=True, exist_ok=True)
+        self.db_path = ensure_sqlite_parent_dir(self.db_path)
 
     def _connect(self) -> sqlite3.Connection:
         """Open a SQLite connection with row factory configured."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        return open_sqlite_row_connection(self.db_path)
 
     def initialize_schema(self) -> None:
         """Create cache schema if it does not exist."""

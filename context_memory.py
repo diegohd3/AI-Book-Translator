@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Sequence, Set
+from typing import Dict, List, Sequence, Set
 
 from glossary import GlossaryMatch
 from style_profile import StyleProfile
@@ -94,8 +94,6 @@ class BookContextMemory:
                 notes=warning_items,
             )
         )
-
-        _ = translated_text
 
     def prompt_snapshot(self, context_window: int) -> Dict[str, object]:
         """Return compact context data for prompt injection."""

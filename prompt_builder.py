@@ -75,14 +75,11 @@ class PromptBuilder:
 
         lines.extend(self._build_style_block())
         lines.append(self._build_signal_instruction(chunk_signal))
-
-        context_block = self._build_context_block(context_snapshot)
-        if context_block:
-            lines.append(context_block)
-
-        glossary_block = self._build_glossary_block(relevant_matches)
-        if glossary_block:
-            lines.append(glossary_block)
+        self._append_context_and_glossary(
+            lines=lines,
+            context_snapshot=context_snapshot,
+            relevant_matches=relevant_matches,
+        )
 
         if stage == "refinement":
             lines.append(
@@ -115,14 +112,11 @@ class PromptBuilder:
         lines.append(
             "Preserve marker placeholders (for example [[TB_SEG_000001_START]]) exactly."
         )
-
-        context_block = self._build_context_block(context_snapshot)
-        if context_block:
-            lines.append(context_block)
-
-        glossary_block = self._build_glossary_block(relevant_matches)
-        if glossary_block:
-            lines.append(glossary_block)
+        self._append_context_and_glossary(
+            lines=lines,
+            context_snapshot=context_snapshot,
+            relevant_matches=relevant_matches,
+        )
 
         if stage == "draft":
             lines.extend(
@@ -206,6 +200,21 @@ class PromptBuilder:
         lines = ["Style profile:"]
         lines.extend(f"- {item}" for item in self.style_profile.as_prompt_lines())
         return lines
+
+    def _append_context_and_glossary(
+        self,
+        *,
+        lines: List[str],
+        context_snapshot: Optional[Dict[str, object]],
+        relevant_matches: Optional[Sequence[GlossaryMatch]],
+    ) -> None:
+        context_block = self._build_context_block(context_snapshot)
+        if context_block:
+            lines.append(context_block)
+
+        glossary_block = self._build_glossary_block(relevant_matches)
+        if glossary_block:
+            lines.append(glossary_block)
 
     @staticmethod
     def _build_signal_instruction(chunk_signal: str) -> str:

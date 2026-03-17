@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from normalization import build_deterministic_key, normalize_text_for_lookup
+from sqlite_utils import ensure_sqlite_parent_dir, open_sqlite_row_connection
 
 logger = logging.getLogger(__name__)
 
@@ -39,16 +40,10 @@ class TranslationMemory:
         self._prepare_storage_path()
 
     def _prepare_storage_path(self) -> None:
-        if self.db_path == ":memory:":
-            return
-        path = Path(self.db_path)
-        if path.parent:
-            path.parent.mkdir(parents=True, exist_ok=True)
+        self.db_path = ensure_sqlite_parent_dir(self.db_path)
 
     def _connect(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        return open_sqlite_row_connection(self.db_path)
 
     def initialize_schema(self) -> None:
         """Create TM schema if it does not exist."""

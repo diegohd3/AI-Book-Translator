@@ -5,7 +5,6 @@ Performs basic text cleaning while preserving paragraph structure.
 """
 
 import logging
-import re
 
 logger = logging.getLogger(__name__)
 

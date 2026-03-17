@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Sequence
 
@@ -18,6 +19,23 @@ from prompt_builder import PromptBuilder
 from style_profile import StyleProfile
 
 logger = logging.getLogger(__name__)
+
+_MOCK_TRANSLATION_TERMS = (
+    ("the", "el/la"),
+    ("is", "es"),
+    ("and", "y"),
+    ("a", "un/una"),
+    ("to", "a"),
+    ("of", "de"),
+    ("in", "en"),
+    ("that", "ese/esa"),
+    ("it", "lo/la"),
+    ("for", "para"),
+)
+_MOCK_TRANSLATION_PATTERNS = tuple(
+    (re.compile(rf"\b{re.escape(source)}\b", flags=re.IGNORECASE), target)
+    for source, target in _MOCK_TRANSLATION_TERMS
+)
 
 
 class BaseTranslator(ABC):
@@ -97,25 +115,9 @@ class MockTranslator(BaseTranslator):
         )
 
     def _mock_translate(self, text: str) -> str:
-        mock_dict = {
-            "the": "el/la",
-            "is": "es",
-            "and": "y",
-            "a": "un/una",
-            "to": "a",
-            "of": "de",
-            "in": "en",
-            "that": "ese/esa",
-            "it": "lo/la",
-            "for": "para",
-        }
-
         translated = text
-        for eng, esp in mock_dict.items():
-            import re
-
-            pattern = r"\b" + eng + r"\b"
-            translated = re.sub(pattern, esp, translated, flags=re.IGNORECASE)
+        for pattern, replacement in _MOCK_TRANSLATION_PATTERNS:
+            translated = pattern.sub(replacement, translated)
 
         return f"[ES MOCK TRANSLATION]\n{translated}"
 
