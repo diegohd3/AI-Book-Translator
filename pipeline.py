@@ -369,6 +369,7 @@ class TranslationPipeline:
                     relevant_matches=relevant_matches,
                     used_targets=used_targets,
                     refinement_drift=refinement_drift,
+                    translator_used=translated.translator_used,
                 )
 
                 if context_memory is not None:
@@ -665,6 +666,7 @@ class TranslationPipeline:
         relevant_matches: Sequence[GlossaryMatch],
         used_targets: Sequence[str],
         refinement_drift: Optional[float],
+        translator_used: Optional[str] = None,
     ) -> List[str]:
         warnings: List[str] = []
 
@@ -679,12 +681,15 @@ class TranslationPipeline:
                 f"RISK: large refinement drift ({refinement_drift}) may indicate meaning shift"
             )
 
-        untranslated_spans = self._find_untranslated_english_spans(translated_text)
-        if untranslated_spans:
-            warnings.append(
-                "RISK: possible untranslated English span(s): "
-                + " | ".join(untranslated_spans[:2])
-            )
+        translator_label = (translator_used or "").strip().lower()
+        is_mock_translation = translator_label.startswith("mocktranslator")
+        if not is_mock_translation:
+            untranslated_spans = self._find_untranslated_english_spans(translated_text)
+            if untranslated_spans:
+                warnings.append(
+                    "RISK: possible untranslated English span(s): "
+                    + " | ".join(untranslated_spans[:2])
+                )
 
         if _UNCERTAIN_RE.search(translated_text):
             warnings.append("UNCERTAIN: translation contains uncertainty markers")

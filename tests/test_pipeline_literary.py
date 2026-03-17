@@ -49,6 +49,8 @@ class LiteraryPipelineTests(unittest.TestCase):
             self.assertIn("chunks", report)
             self.assertGreaterEqual(len(report["chunks"]), 1)
             self.assertFalse(report["chunks"][0]["refinement_applied"])
+            self.assertEqual([], report["consistency_risks"])
+            self.assertEqual([], report["chunks"][0]["warnings"])
 
     def test_policy_hash_changes_cache_partition(self) -> None:
         root = Path(__file__).resolve().parents[1]
