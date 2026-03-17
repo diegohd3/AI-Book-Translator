@@ -13,6 +13,13 @@ from glossary import GlossaryMatch, GlossaryTerm, iter_glossary_pairs
 from models import TextChunk
 from style_profile import StyleProfile, default_style_profile
 
+PROMPT_POLICY_VERSION = "prompt-v2-spanish-syntax-2026-03-17"
+
+
+def get_prompt_policy_version() -> str:
+    """Return cache/TM partition version for prompt-template behavior."""
+    return PROMPT_POLICY_VERSION
+
 
 class PromptBuilder:
     """Builds stage-aware translation prompts for literary text."""
@@ -57,6 +64,9 @@ class PromptBuilder:
             "Preserve literary flow, author intent, emotion, and paragraph structure.",
             "Produce natural, idiomatic Spanish that does not sound machine-translated.",
             "Avoid literal mechanical phrasing and keep character voices differentiated.",
+            "Prioritize idiomatic Spanish word order over source-language calques.",
+            "Adapt punctuation to natural Spanish rhythm instead of mirroring English commas.",
+            "Avoid comma splits between subject and verb or before simple coordinating conjunctions.",
             (
                 "If placeholder tokens like [[TB_SEG_000001_START]] or "
                 "[[TB_SEG_000001_END]] appear, keep them unchanged and in the same order."
@@ -78,6 +88,10 @@ class PromptBuilder:
             lines.append(
                 "Refinement stage: improve fluency/readability and literary tone "
                 "without adding or changing meaning from the source text."
+            )
+            lines.append(
+                "During refinement, fix awkward syntax and punctuation calques that read "
+                "as translated Spanish."
             )
 
         return "\n".join(lines)
@@ -115,6 +129,8 @@ class PromptBuilder:
                 [
                     "Translate faithfully with natural Spanish cadence.",
                     "Keep subtext and emotional tension intact.",
+                    "Reorder sentence elements when needed for idiomatic Spanish syntax.",
+                    "Use Spanish punctuation naturally; remove unnecessary comma carryover.",
                     "Return only the translated text.",
                     "",
                     "SOURCE TEXT:",
@@ -133,6 +149,8 @@ class PromptBuilder:
                 "Refine the draft into polished literary Spanish.",
                 "Do not invent details or alter the source meaning.",
                 "Preserve paragraph boundaries and pacing.",
+                "Fix punctuation and word-order calques from English.",
+                "Prefer constructions that sound native to educated general Spanish readers.",
                 "Return only the refined text.",
                 "",
                 "SOURCE TEXT:",

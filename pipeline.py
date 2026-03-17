@@ -32,6 +32,7 @@ from glossary import (
 from models import TextChunk, TranslatedChunk, TranslationResult
 from normalization import sha256_hexdigest
 from reporting import ChunkReportEntry, ReportWriter, TranslationRunReport
+from prompt_builder import get_prompt_policy_version
 from style_profile import StyleProfile, default_style_profile, load_style_profile
 from translation_memory import (
     TranslationMemory,
@@ -61,6 +62,9 @@ _ENGLISH_HINT_WORDS = {
     "because",
     "would",
 }
+_SPANISH_COMMA_BEFORE_CONJ_RE = re.compile(r",\s+(?:y|o|e|u)\b", flags=re.IGNORECASE)
+_SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+[,:;!?]")
+_DOUBLE_COMMA_RE = re.compile(r",\s*,")
 
 
 class TranslationPipeline:
@@ -646,10 +650,16 @@ class TranslationPipeline:
 
     def _build_policy_hash(self, *, style_profile_hash: str, glossary_hash: str) -> str:
         """Compute policy hash used to partition cache/TM reuse."""
+        model_dimension = (
+            self.config.model.strip()
+            if self.config.translator_type == "openai"
+            else self.translator.get_name()
+        )
         payload = (
             f"style:{style_profile_hash}|glossary:{glossary_hash}|"
             f"refinement:{self.config.enable_refinement}|context:{self.config.context_window}|"
-            f"format:{self.document_format}"
+            f"format:{self.document_format}|backend:{self.config.translator_type}|"
+            f"model:{model_dimension}|prompt:{get_prompt_policy_version()}"
         )
         return sha256_hexdigest(payload)
 
@@ -690,6 +700,9 @@ class TranslationPipeline:
                     "RISK: possible untranslated English span(s): "
                     + " | ".join(untranslated_spans[:2])
                 )
+            style_risks = self._find_spanish_style_risks(translated_text)
+            for risk in style_risks:
+                warnings.append(f"RISK: {risk}")
 
         if _UNCERTAIN_RE.search(translated_text):
             warnings.append("UNCERTAIN: translation contains uncertainty markers")
@@ -698,6 +711,34 @@ class TranslationPipeline:
             warnings.append("UNCERTAIN: empty translated output")
 
         return warnings
+
+    @staticmethod
+    def _find_spanish_style_risks(text: str) -> List[str]:
+        risks: List[str] = []
+        value = text or ""
+
+        if _SPANISH_COMMA_BEFORE_CONJ_RE.search(value):
+            risks.append(
+                "possible comma calque before a coordinating conjunction (y/o/e/u)"
+            )
+        if _SPACE_BEFORE_PUNCT_RE.search(value):
+            risks.append("unexpected spacing before punctuation")
+        if _DOUBLE_COMMA_RE.search(value):
+            risks.append("repeated comma punctuation")
+        if "?" in value and "¿" not in value:
+            risks.append("question mark without opening inverted mark")
+        if "!" in value and "¡" not in value:
+            risks.append("exclamation mark without opening inverted mark")
+
+        unique_risks: List[str] = []
+        seen = set()
+        for risk in risks:
+            key = risk.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            unique_risks.append(risk)
+        return unique_risks
 
     @staticmethod
     def _find_untranslated_english_spans(text: str) -> List[str]:

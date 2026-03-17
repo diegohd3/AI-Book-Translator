@@ -88,6 +88,14 @@ class LiteraryPipelineTests(unittest.TestCase):
 
             self.assertEqual(0, report_b["cache_hits"])
 
+    def test_spanish_style_risk_heuristics(self) -> None:
+        risks = TranslationPipeline._find_spanish_style_risks("Ella corrio, y luego grito !")
+        self.assertTrue(any("comma calque" in item for item in risks))
+        self.assertTrue(any("spacing before punctuation" in item for item in risks))
+        self.assertTrue(
+            any("exclamation mark without opening inverted mark" in item for item in risks)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

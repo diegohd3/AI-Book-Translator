@@ -2,7 +2,7 @@
 
 from glossary import GlossaryMatch, GlossaryTerm
 from models import TextChunk
-from prompt_builder import PromptBuilder
+from prompt_builder import PromptBuilder, get_prompt_policy_version
 from style_profile import default_style_profile
 
 
@@ -40,6 +40,19 @@ class PromptBuilderTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             builder.build_translation_prompt(chunk, stage="refinement")
+
+    def test_system_prompt_contains_spanish_syntax_guardrails(self) -> None:
+        builder = PromptBuilder(style_profile=default_style_profile("en", "es"))
+        system_prompt = builder.build_system_prompt(stage="draft", chunk_signal="narration")
+
+        self.assertIn("word order", system_prompt)
+        self.assertIn("punctuation", system_prompt)
+        self.assertIn("coordinating conjunctions", system_prompt)
+
+    def test_prompt_policy_version_is_non_empty(self) -> None:
+        version = get_prompt_policy_version()
+        self.assertIsInstance(version, str)
+        self.assertTrue(version.strip())
 
 
 if __name__ == "__main__":
